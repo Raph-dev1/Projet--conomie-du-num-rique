@@ -15,14 +15,14 @@ def select_random_individuals(df, count=150):
     return df.sample(n=count, random_state=42)
 
 # Sélectionner les individus finaux
-IndividusEXP_df = select_random_individuals(df)
+Individus_EXP = select_random_individuals(df)
 
 # Sauvegarder les fichiers
-df.to_csv("individus_bdd_age.csv", index=False)  # Fichier avec les âges ajoutés
-IndividusEXP_df.to_csv("individus_EXP.csv", index=False)  # Fichier avec les 150 individus sélectionnés
 
-
+Individus_EXP.to_csv("individus_EXP.csv", index=False)  # Fichier avec les 150 individus sélectionnés
 print("Fichier individus_finaux.csv généré.")
+
+#Ce code génère un sample de 150 individus, avec un age aléatoire ( 18 à 99 ans)
 
 
 
