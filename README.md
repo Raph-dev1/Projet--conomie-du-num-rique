@@ -1,5 +1,6 @@
-# Projet-économie-du-num-rique
-Permet de modéliser l'impact des propositions politiques sur les intentions de vote des individus en fonction de leur profil sociodémographique et de leurs préférences.
+# Projet-économie-du-numérique
+Mon projet permet d'experimenter et de tester la capacité des LLM à modéliser l'impact des propositions politiques sur les intentions de vote des individus en fonction de leur profil sociodémographique et de leurs préférences.
+
 import pandas as pd
 import numpy as np
 
