@@ -9,18 +9,18 @@ import numpy as np
 import pandas as pd
 import random
 
-    # Charger la base de données "individus_bdd"
-df = pd.read_csv("individus_bdd.csv")
+ # Charger la base de données "individus_bdd"
+        df = pd.read_csv("individus_bdd.csv")
 
-    # Ajouter une colonne "Âge" avec des valeurs aléatoires entre 18 et 99
-df['Âge'] = [random.randint(18, 99) for _ in range(len(df))]
+ # Ajouter une colonne "Âge" avec des valeurs aléatoires entre 18 et 99
+        df['Âge'] = [random.randint(18, 99) for _ in range(len(df))]
 
-    # Sélectionner 150 individus aléatoires
-def select_random_individuals(df, count=150):
-    if len(df) < count:
-        print("Le DataFrame contient moins de 150 individus, tous seront inclus.")
-        return df
-    return df.sample(n=count, random_state=42)
+ # Sélectionner 150 individus aléatoires
+    def select_random_individuals(df, count=150):
+        if len(df) < count:
+            print("Le DataFrame contient moins de 150 individus, tous seront inclus.")
+            return df
+        return df.sample(n=count, random_state=42)
 
     # Sélectionner les individus finaux
 Individus_EXP = select_random_individuals(df)
