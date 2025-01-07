@@ -1,11 +1,12 @@
 # Projet-économie-du-numérique
 Mon projet permet d'experimenter et de tester la capacité des LLM à modéliser l'impact des propositions politiques sur les intentions de vote des individus en fonction de leur profil sociodémographique et de leurs préférences.
 
+
+
+# Génération d'une base de données de 150 individus
 import pandas as pd
 import numpy as np
 
-# Génération des données pour les individus
-n_individus = 150
 
 df = pd.DataFrame({
     'Âge': np.random.randint(18, 101, n_individus),
