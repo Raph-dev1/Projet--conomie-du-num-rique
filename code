@@ -1,3 +1,115 @@
+
+import os
+import pandas as pd
+import json
+import time
+from mistralai import Mistral
+import xml.etree.ElementTree as ET
+
+# Initialisation avec votre clé API
+api_key = "xxxxxxxxxxxxxxxxxx"
+model = "mistral-large-latest"
+client = Mistral(api_key=api_key)
+
+# Charger la base de données "Individus_EXP"
+df = pd.read_csv("Individus_EXP.csv")
+
+# Fonction pour demander à Mistral d'associer un profil logique
+def get_logical_profile(prenom, age, retries=3, cooldown=30):
+    prompt = f"""
+    Associez un profil réaliste et cohérent pour un individu avec les caractéristiques suivantes :
+    - Prénom : {prenom}
+    - Âge : {age}
+    
+    Les variables à attribuer sont strictement :
+    - Statut matrimonial : Divorcé, Veuf, Marié, Célibataire.
+    - Niveau éducation : Pas de diplôme, Doctorat, Licence, Bac, Master.
+    - Statut professionnel : Indépendant, Retraité, Étudiant, Salarié, Chômeur.
+    - Quartier : Banlieue, Zone industrielle, Centre-ville.
+    - Revenu : <20k€, 20-40k€, 40-60k€, >60k€.
+    - Statut logement : Locataire, Propriétaire.
+    - Type de logement : Maison, Appartement.
+    - Mode de transport : Vélo, Transport en commun, Voiture personnelle, Covoiturage, Télétravail, À pied.
+    - Distance domicile-travail : Moins de 1 km, 1-5 km, 5-10 km, Plus de 10 km.
+    - Affiliation politique : , droite, centre, gauche.
+    - Priorités politiques : Éducation, Environnement, Économie, Sécurité, Santé.
+    - Participation électorale : Régulière, Occasionnelle, Jamais.
+    - Fréquence de discussions politiques : Faible, Moyenne, Élevée.
+    - Confiance dans les institutions (tu dois le faire aléatoirement) : Faible, Moyenne, Forte.
+    - Engagement politique : Oui, Non.
+    - Influence sociale : Isolé, Leader, Suiveur.
+    - Taille du réseau social : Petit, Moyen, Grand.
+    - Activité en ligne : Actif, Passif, Inactif.
+    - Opinion sur l'immigration : Négative, Positive, Neutre.
+    - Opinion sur la fiscalité : Pour une baisse, Pour une hausse, Neutre.
+    - Opinion sur les énergies : Fossiles, Renouvelables, Mixte.
+    - Probabilité de changer d'avis : Faible, Moyenne, Élevée.
+    - Réactivité aux campagnes : Faible, Moyenne, Forte.
+    - Interactions interquartiers : Rare, Moyenne, Fréquente.
+    - Nombre d'enfants : 0, 1, 2, 3, 4.
+
+    Fournissez une réponse au format XML compact avec les variables ci-dessus.
+    """
+    for attempt in range(retries):
+        try:
+            response = client.chat.complete(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Erreur pour {prenom} ({age} ans) : {e}")
+            if "429" in str(e):  # Gestion de la limite d'appels
+                print(f"Limite atteinte, attente de {cooldown} secondes...")
+                time.sleep(cooldown)
+            else:
+                break
+    return "<error></error>"  # Retourne un XML vide en cas d'erreur
+
+# Utiliser DataFrame.itertuples pour accélérer les boucles
+profiles = []
+brutes = []  # Collecter les réponses brutes non XML
+
+total_individuals = len(df)
+
+for index, row in enumerate(df.itertuples(index=False), start=1):
+    print(f"Traitement de {row.Prenom} ({getattr(row, 'Âge')} ans), {index}/{total_individuals}...")
+    profile_xml = get_logical_profile(row.Prenom, getattr(row, 'Âge'))  # Correction de l'accès à la colonne Âge
+    try:
+        # Tenter de parser le XML pour vérifier la validité
+        root = ET.fromstring(profile_xml)
+        profile_dict = {child.tag: child.text for child in root}
+        profiles.append(profile_dict)
+    except ET.ParseError:
+        print(f"Erreur de décodage XML pour {row.Prenom} ({getattr(row, 'Âge')} ans). Réponse brute : {profile_xml}")
+        # Compactage de la réponse brute
+        compact_xml = profile_xml.replace("\n", " ").replace("  ", " ").strip()
+        profiles.append({})  # Ajouter un profil vide en cas d'erreur
+        brutes.append({"Prenom": row.Prenom, "Âge": getattr(row, 'Âge'), "Réponse brute": compact_xml})
+
+# Ajouter les variables au DataFrame
+profiles_df = pd.DataFrame(profiles)  # Convertir la liste de profils en DataFrame
+df = pd.concat([df, profiles_df], axis=1)  # Fusionner les données originales avec les profils
+
+# Créer un DataFrame pour les réponses brutes
+brutes_df = pd.DataFrame(brutes)
+
+# Sauvegarder les fichiers complétés
+output_file_path = "Individus_EXP_complet_colonnes.csv"
+df.to_csv(output_file_path, index=False)
+print(f"Fichier complété généré : {output_file_path}")
+
+if not brutes_df.empty:
+    brutes_output_file_path = "Individus_EXP_reponses_brutes.csv"
+    brutes_df.to_csv(brutes_output_file_path, index=False)
+    print(f"Fichier des réponses brutes généré : {brutes_output_file_path}")
+
+
+
+
+
+
+
 import pandas as pd
 import numpy as np
 
