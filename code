@@ -1,3 +1,34 @@
+import pandas as pd
+import random
+
+# Charger la base de données "individus_bdd"
+df = pd.read_csv("individus_bdd.csv")
+
+# Ajouter une colonne "Âge" avec des valeurs aléatoires entre 18 et 99
+df['Âge'] = [random.randint(18, 99) for _ in range(len(df))]
+
+# Sélectionner 150 individus aléatoires
+def select_random_individuals(df, count=150):
+    if len(df) < count:
+        print("Le DataFrame contient moins de 150 individus, tous seront inclus.")
+        return df
+    return df.sample(n=count, random_state=42)
+
+# Sélectionner les individus finaux
+IndividusEXP_df = select_random_individuals(df)
+
+# Sauvegarder les fichiers
+df.to_csv("individus_bdd_age.csv", index=False)  # Fichier avec les âges ajoutés
+IndividusEXP_df.to_csv("individus_EXP.csv", index=False)  # Fichier avec les 150 individus sélectionnés
+
+
+print("Fichier individus_finaux.csv généré.")
+
+
+
+
+
+
 
 import os
 import pandas as pd
