@@ -357,9 +357,9 @@ Le code nécéssite la base de données : individus_bdd.csv
         else:
             print(f"Aucune réponse valide obtenue pour le lot {i+1}.")
 
+--------------------------
 #Copiez l'output de ce dernier scipt dans le press papier
-
-------------------
+--------------------------
 ## Agréger tous les résultats en collant l'output à l'emplacement indiqué
     import pandas as pd
     import re
