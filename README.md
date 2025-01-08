@@ -185,4 +185,177 @@ Le code nécéssite la base de données : individus_bdd.csv
     else:
         print("Aucun résultat final disponible.")
 
+# tests des scénarios politiques 
+    import os
+    import pandas as pd
+    import numpy as np
+    from mistralai import Mistral
+    from io import StringIO
+    import json
+
+# Initialisation avec votre clé API
+    api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    model = "mistral-large-latest"
+    client = Mistral(api_key=api_key)
+
+# Charger la base de données des individus
+    df = pd.read_csv("Individus_EXP_complet.csv")
+    batch_size = 10  # Nombre d'individus par lot
+    num_batches = int(np.ceil(len(df) / batch_size))
+
+# Définir les propositions initiales et revisitées
+    propositions_data = {
+        "Courants politiques": ["Gauche", "Gauche", "Gauche", "Centre", "Centre", "Centre", "Droite", "Droite", "Droite"],
+        "Valeurs principales": [
+            "Égalité sociale", "Solidarité", "Progressisme", 
+            "Pragmatisme", "Compromis", "Modération",
+            "Autorité", "Tradition", "Liberté individuelle"
+        ],
+        "Propositions Initiales": [
+            "Augmentation du SMIC à 1 500 € net",
+            "Création d'un revenu universel d'existence",
+            "Légalisation du cannabis",
+            "Réduction du nombre de fonctionnaires",
+            "Introduction de la proportionnelle",
+            "Suppression de la taxe d’habitation",
+            "Réduction de l’immigration légale",
+            "Défense des valeurs familiales traditionnelles",
+            "Allégement de la fiscalité sur les successions"
+        ],
+        "Propositions Revisitées": [
+            "Revaloriser immédiatement le SMIC à 1 500 € net pour répondre à l’inflation. Inclut des soutiens aux entreprises.",
+            "Mise en place d’un revenu progressif ciblant les jeunes et retraités précaires.",
+            "Encadrer et légaliser le cannabis pour investir dans la prévention et l’éducation.",
+            "Réduction progressive des effectifs non essentiels avec numérisation des services.",
+            "Introduction de la proportionnelle pour une meilleure représentation citoyenne.",
+            "Suppression totale avec une réforme fiscale équitable.",
+            "Mise en œuvre d’une politique d’intégration pour garantir cohésion et sécurité.",
+            "Augmentation des allocations pour familles nombreuses.",
+            "Réduction drastique des droits de succession"
+        ]
+    }
+    propositions_df = pd.DataFrame(propositions_data)
+
+# Définir les scénarios
+    scenarios = {
+        "Scénario 1": "Propositions initiales réelles pour tous les partis.",
+        "Scénario 2 - Gauche": "Optimisation par parti : Gauche applique ses propositions revisitées contre les initiales des autres.",
+        "Scénario 2 - Centre": "Optimisation par parti : Centre applique ses propositions revisitées contre les initiales des autres.",
+        "Scénario 2 - Droite": "Optimisation par parti : Droite applique ses propositions revisitées contre les initiales des autres.",
+        "Scénario 3": "Proposition utopique pour la Gauche (SMIC à 6000 €)."
+    }
+
+# Fonction pour préparer le prompt et exécuter la simulation avec Mistral
+    def mistral_simulation(individuals, propositions, scenarios, retries=3, cooldown=30):
+        prompt = f"""
+        Vous devez simuler les intentions de vote pour les individus de la base de données fournies en fonction des scénarios politiques.
+        Voici les données :
+    
+        ### INDIVIDUS ###
+        Les individus sont décrits avec les caractéristiques suivantes :
+        {individuals.to_dict(orient='records')}
+    
+        ### PROPOSITIONS ###
+        Voici les propositions initiales et revisitées pour chaque parti :
+        {propositions.to_dict(orient='records')}
+    
+        ### SCÉNARIOS ###
+        Les scénarios à simuler sont :
+        {scenarios}
+    
+        ### INSTRUCTIONS ###
+        Pour chaque individu, simulez une interaction avec chaque proposition dans chaque scénario. 
+        - Les intentions de vote doivent être ajustées en fonction de toutes les caractéristiques des individus :âge, niveau_education, revenu, statut_professionnel, quartier, affiliation_politique, priorités_politiques, participation_électorale, confiance_institutions, opinion_immigration, opinion_fiscalité, opinion_énergies.Simulez les interactions (tracts, débats, réseaux sociaux) pour influencer les intentions de vote.
+        - Dans le Scénario 1, à chaque individus tu dois presenter les propositons initiales contres les propositions initiales des autres.
+        - Dans le Scénario 2, présente les propositions revisitées pour chaque parti contre les propositions initiales des autres. 
+        - Dans le Scénario 3, présente une proposition utopique pour la Gauche (SMIC à 6000 €), contre les propositions initiales des autres.
+        Retournez les résultats sous la forme d'une agrégation des intentions de vote pour chaque parti à chaque scénario (Gauche, Centre, Droite, Blanc/Nul), conserve le meme format de sorties a chaque batsh, ### FORMAT DE RÉPONSE ATTENDU ###
+    Retournez les résultats des intentions de vote sous ce format exact. Respectez strictement la structure, les titres, et l'alignement des colonnes pour chaque scénario.
+    
+    Format imperatif attendu :
+    
+    ### RÉSULTATS DES SIMULATIONS INTENTIONS DE VOTES  ###
+    avec Calculer la moyenne pondérée = strictement nombre de votants partis/ 10 par scenario par batsh pour les pourcentages dans les tableaux,
+              
+    #### Scénario 1 Propositions initiales
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 2 - Gauche applique ses propositions revisitées
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 2 - Centre applique ses propositions revisitées
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 2 - Droite applique ses propositions revisitées
+    || Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 3
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    ne pas integrer de ### Détails des simulations.
+    
+    puis print le resultat du batsh suivant.
+    
+        """
+        
+        for attempt in range(retries):
+            try:
+                response = client.chat.complete(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                print(f"Erreur d'appel à Mistral : {e}")
+                if "429" in str(e):  # Gestion de la limite d'appels
+                    print(f"Limite atteinte, attente de {cooldown} secondes...")
+                    time.sleep(cooldown)
+                else:
+                    break
+        return None  # En cas d'échec
+
+# Lancer les simulations par lots
+    all_results = []
+    for i in range(num_batches):
+        print(f"Traitement du lot {i+1}/{num_batches}...")
+        batch = df.iloc[i * batch_size:(i + 1) * batch_size]
+        response = mistral_simulation(batch, propositions_df, scenarios)
+        
+        if response:
+            try:
+                # Convertir la réponse JSON en DataFrame
+                results = pd.read_json(StringIO(response))
+                all_results.append(results)
+            except ValueError as e:
+                print(f"Erreur dans le traitement de la réponse de Mistral pour le lot {i+1} : {e}")
+                print("Résultats :", response)
+        else:
+            print(f"Aucune réponse valide obtenue pour le lot {i+1}.")
+
+
 
