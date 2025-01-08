@@ -7,35 +7,35 @@ Le projet s’appuie sur GPT-4o pour optimiser des propositions politiques, puis
 
 # Méthodologie
     
-    Le projet suit une approche en trois étapes principales :
-    
-    Préparation des données :
-    Une base de données contenant 150 individus est générée. Chaque individu est caractérisé par un profil détaillé, comprenant des variables (vides) telles que l'âge, le revenu, les opinions politiques, et d'autres caractéristiques sociodémographiques pertinentes.
-    
-    Complétion des données :
-    Les variables dans ces profils sont complétées par l'API Mistral, à l’aide de distributions réalistes et cohérentes définies dans un prompt structuré.
-    
-    Simulation des votes :
-    3 scénarios politiques sont simulés :
-    
-    Propositions initiales : Interaction des individus avec les propositions originales des programmes politiques.
-    
-    Propositions optimisées : Interaction avec des propositions revisitées et optimisées par GPT-4o, contre les propositions initiales.
-    -Scénario 2.1 - La Gauche applique ses propositions revisitées contre les initiales des autres.
-    -Scénario 2.2 - Le Centre applique ses propositions revisitées contre les initiales des autres.
-    -Scénario 2.3 - La Droite applique ses propositions revisitées contre les initiales des autres.
-    
-    Propositions utopiques : Par exemple, une proposition très ambitieuse pour un parti spécifique.
-    Les simulations évaluent comment ces propositions influencent les intentions de vote, en tenant compte des caractéristiques individuelles.
-    Permet d'oberserver des variations en cas de proposititon utopique/irréaliste, ==> illustre la perception plus générale d'un partis en particullier,
-    
-    Analyse des résultats
-    Les résultats sont agrégés pour chaque scénario, en calculant :
-    
-    Le nombre et la part de votants pour chaque parti.
-    L’impact différentiel des propositions initiales et optimisées.
-    La performance de l’API Mistral dans la modélisation et l’influence des intentions de vote.
-    Ce projet constitue une expérimentation unique sur l’interaction entre profils sociodémographiques, propositions politiques, et outils d’IA, tout en mettant en lumière les dynamiques entre optimisation algorithmique et comportement électoral.
+Le projet suit une approche en trois étapes principales :
+
+Préparation des données :
+Une base de données contenant 150 individus est générée. Chaque individu est caractérisé par un profil détaillé, comprenant des variables (vides) telles que l'âge, le revenu, les opinions politiques, et d'autres caractéristiques sociodémographiques pertinentes.
+
+Complétion des données :
+Les variables dans ces profils sont complétées par l'API Mistral, à l’aide de distributions réalistes et cohérentes définies dans un prompt structuré.
+
+Simulation des votes :
+3 scénarios politiques sont simulés :
+
+Propositions initiales : Interaction des individus avec les propositions originales des programmes politiques.
+
+Propositions optimisées : Interaction avec des propositions revisitées et optimisées par GPT-4o, contre les propositions initiales.
+-Scénario 2.1 - La Gauche applique ses propositions revisitées contre les initiales des autres.
+-Scénario 2.2 - Le Centre applique ses propositions revisitées contre les initiales des autres.
+-Scénario 2.3 - La Droite applique ses propositions revisitées contre les initiales des autres.
+
+Propositions utopiques : Par exemple, une proposition très ambitieuse pour un parti spécifique.
+Les simulations évaluent comment ces propositions influencent les intentions de vote, en tenant compte des caractéristiques individuelles.
+Permet d'oberserver des variations en cas de proposititon utopique/irréaliste, ==> illustre la perception plus générale d'un partis en particullier,
+
+Analyse des résultats
+Les résultats sont agrégés pour chaque scénario, en calculant :
+
+Le nombre et la part de votants pour chaque parti.
+L’impact différentiel des propositions initiales et optimisées.
+La performance de l’API Mistral dans la modélisation et l’influence des intentions de vote.
+Ce projet constitue une expérimentation unique sur l’interaction entre profils sociodémographiques, propositions politiques, et outils d’IA, tout en mettant en lumière les dynamiques entre optimisation algorithmique et comportement électoral.
 
 # Génération d'une base de données de 150 individus
 
