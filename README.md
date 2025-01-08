@@ -193,17 +193,17 @@ Le code nécéssite la base de données : individus_bdd.csv
     from io import StringIO
     import json
 
-# Initialisation avec votre clé API
+    # Initialisation avec votre clé API
     api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     model = "mistral-large-latest"
     client = Mistral(api_key=api_key)
 
-# Charger la base de données des individus
+    # Charger la base de données des individus
     df = pd.read_csv("Individus_EXP_complet.csv")
     batch_size = 10  # Nombre d'individus par lot
     num_batches = int(np.ceil(len(df) / batch_size))
 
-# Définir les propositions initiales et revisitées
+    # Définir les propositions initiales et revisitées
     propositions_data = {
         "Courants politiques": ["Gauche", "Gauche", "Gauche", "Centre", "Centre", "Centre", "Droite", "Droite", "Droite"],
         "Valeurs principales": [
@@ -236,7 +236,7 @@ Le code nécéssite la base de données : individus_bdd.csv
     }
     propositions_df = pd.DataFrame(propositions_data)
 
-# Définir les scénarios
+    # Définir les scénarios
     scenarios = {
         "Scénario 1": "Propositions initiales réelles pour tous les partis.",
         "Scénario 2 - Gauche": "Optimisation par parti : Gauche applique ses propositions revisitées contre les initiales des autres.",
@@ -245,7 +245,7 @@ Le code nécéssite la base de données : individus_bdd.csv
         "Scénario 3": "Proposition utopique pour la Gauche (SMIC à 6000 €)."
     }
 
-# Fonction pour préparer le prompt et exécuter la simulation avec Mistral
+    # Fonction pour préparer le prompt et exécuter la simulation avec Mistral
     def mistral_simulation(individuals, propositions, scenarios, retries=3, cooldown=30):
         prompt = f"""
         Vous devez simuler les intentions de vote pour les individus de la base de données fournies en fonction des scénarios politiques.
@@ -339,7 +339,7 @@ Le code nécéssite la base de données : individus_bdd.csv
                     break
         return None  # En cas d'échec
 
-# Lancer les simulations par lots
+    # Lancer les simulations par lots
     all_results = []
     for i in range(num_batches):
         print(f"Traitement du lot {i+1}/{num_batches}...")
