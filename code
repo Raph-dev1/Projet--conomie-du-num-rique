@@ -1,348 +1,424 @@
-import pandas as pd
-import random
+# Projet-économie-du-numérique
+#Le code nécéssite la base de données : individus_bdd.csv
+# Génération d'une base de données de 150 individus
 
-# Charger la base de données "individus_bdd"
-df = pd.read_csv("individus_bdd.csv")
+    import numpy as np
+    import pandas as pd
+    import random
 
-# Ajouter une colonne "Âge" avec des valeurs aléatoires entre 18 et 99
-df['Âge'] = [random.randint(18, 99) for _ in range(len(df))]
+    # Charger la base de données "individus_bdd"
+    df = pd.read_csv("individus_bdd.csv")
+
+# Ajouter une colonne "Age" avec des valeurs aléatoires entre 18 et 99
+    df['Age'] = [random.randint(18, 99) for _ in range(len(df))]
 
 # Sélectionner 150 individus aléatoires
-def select_random_individuals(df, count=150):
-    if len(df) < count:
-        print("Le DataFrame contient moins de 150 individus, tous seront inclus.")
-        return df
-    return df.sample(n=count, random_state=42)
+    def select_random_individuals(df, count=150):
+        if len(df) < count:
+            print("Le DataFrame contient moins de 150 individus, tous seront inclus.")
+            return df
+        return df.sample(n=count, random_state=42)
 
 # Sélectionner les individus finaux
-Individus_EXP = select_random_individuals(df)
+    Individus_EXP = select_random_individuals(df)
 
 # Sauvegarder les fichiers
 
-Individus_EXP.to_csv("individus_EXP.csv", index=False)  # Fichier avec les 150 individus sélectionnés
-print("Fichier individus_finaux.csv généré.")
+    Individus_EXP.to_csv("sample_individus.csv", index=False)  # Fichier avec les 150 individus sélectionnés
+    print("sample_individus.csv généré.")
 
-#Ce code génère un sample de 150 individus, avec un age aléatoire ( 18 à 99 ans)
+#Ce code génère un profil pour les 150 individus choisis au hasard
+  
+    df = pd.read_csv("sample_individus.csv")
+    # Charger la base de données "sample_individus.csv"
+# Liste des colonnes à ajouter
+    colonnes_a_ajouter = [
+        "statut_matrimonial",
+        "niveau_education",
+        "statut_professionnel",
+        "quartier",
+        "revenu",
+        "statut_logement",
+        "type_logement",
+        "mode_transport",
+        "distance_domicile_travail",
+        "affiliation_politique",
+        "priorités_politiques",
+        "participation_électorale",
+        "fréquence_discussions_politiques",
+        "confiance_institutions",
+        "engagement_politique",
+        "influence_sociale",
+        "taille_réseau_social",
+        "activité_en_ligne",
+        "opinion_immigration",
+        "opinion_fiscalité",
+        "opinion_énergies",
+        "probabilité_changement_avis",
+        "réactivité_campagnes",
+        "interactions_interquartiers",
+        "nombre_enfants",
+    ]
+# Ajouter les colonnes non remplies 
+    for colonne in colonnes_a_ajouter:
+        if colonne not in df.columns:
+            df[colonne] = pd.NA
+
+# Sauvegarder le fichier avec les colonnes ajoutées
+    output_file_path = "sample_individus_avec_colonnes.csv"
+    df.to_csv(output_file_path, index=False)
+    print(f"Fichier avec colonnes ajoutées généré : {output_file_path}")       
 
 
-
-
-
-
-
-import os
-import pandas as pd
-import json
-import time
-from mistralai import Mistral
-import xml.etree.ElementTree as ET
+# Ajout des variables &leatoire dans le CSV par MIstral AI
+    import time
+    from mistralai import Mistral
 
 # Initialisation avec votre clé API
-api_key = "xxxxxxxxxxxxxxxxxx"
-model = "mistral-large-latest"
-client = Mistral(api_key=api_key)
+    api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    model = "mistral-large-latest"
+    client = Mistral(api_key=api_key)
 
-# Charger la base de données "Individus_EXP"
-df = pd.read_csv("Individus_EXP.csv")
+    # Charger la base de données à compléter
+    df = pd.read_csv("sample_individus_avec_colonnes.csv")
 
-# Fonction pour demander à Mistral d'associer un profil logique
-def get_logical_profile(prenom, age, retries=3, cooldown=30):
-    prompt = f"""
-    Associez un profil réaliste et cohérent pour un individu avec les caractéristiques suivantes :
-    - Prénom : {prenom}
-    - Âge : {age}
-    
-    Les variables à attribuer sont strictement :
-    - Statut matrimonial : Divorcé, Veuf, Marié, Célibataire.
-    - Niveau éducation : Pas de diplôme, Doctorat, Licence, Bac, Master.
-    - Statut professionnel : Indépendant, Retraité, Étudiant, Salarié, Chômeur.
-    - Quartier : Banlieue, Zone industrielle, Centre-ville.
-    - Revenu : <20k€, 20-40k€, 40-60k€, >60k€.
-    - Statut logement : Locataire, Propriétaire.
+# Fonction pour demander à Mistral de compléter les données manquantes
+    def complete_missing_data_with_mistral(data):
+        prompt = f"""
+        Voici un fichier CSV contenant des données d'individus avec des colonnes incomplètes. Complétez les données manquantes de manière réaliste et cohérente en respectant les valeurs possibles suivantes :
+
+    - Statut matrimonial : Divorce, Veuf, Marie, Celibataire.
+    - Niveau education : Pas de diplome, Doctorat, Licence, Bac, Master.
+    - Statut professionnel : Indépendant, Retraite, Etudiant, Salarie, Chomeur.
+    - Quartier : Banlieue, Zone industrielle, Centre ville.
+    - Revenu : Moins de 20k€, entre 20 et 40k€, Entre 40 et 60k€, Plus de 60k€.
+    - Statut logement : Locataire, Proprietaire.
     - Type de logement : Maison, Appartement.
-    - Mode de transport : Vélo, Transport en commun, Voiture personnelle, Covoiturage, Télétravail, À pied.
-    - Distance domicile-travail : Moins de 1 km, 1-5 km, 5-10 km, Plus de 10 km.
-    - Affiliation politique : , droite, centre, gauche.
+    - Mode de transport : Velo, Transport en commun, Voiture personnelle, Covoiturage, Teletravail, A pied.
+    - Distance domicile-travail : Moins de 1 km, Entre 1 et 5 km, Entre 5 et 10 km, Plus de 10 km.
+    - Affiliation politique : droite, centre, gauche.
     - Priorités politiques : Éducation, Environnement, Économie, Sécurité, Santé.
     - Participation électorale : Régulière, Occasionnelle, Jamais.
-    - Fréquence de discussions politiques : Faible, Moyenne, Élevée.
-    - Confiance dans les institutions (tu dois le faire aléatoirement) : Faible, Moyenne, Forte.
+    - Fréquence de discussions politiques : Faible, Moyenne, forte.
+    - Confiance dans les institutions : Faible, Moyenne, Forte.
     - Engagement politique : Oui, Non.
     - Influence sociale : Isolé, Leader, Suiveur.
     - Taille du réseau social : Petit, Moyen, Grand.
     - Activité en ligne : Actif, Passif, Inactif.
-    - Opinion sur l'immigration : Négative, Positive, Neutre.
+    - Opinion sur immigration : Négative, Positive, Neutre.
     - Opinion sur la fiscalité : Pour une baisse, Pour une hausse, Neutre.
     - Opinion sur les énergies : Fossiles, Renouvelables, Mixte.
-    - Probabilité de changer d'avis : Faible, Moyenne, Élevée.
+    - Probabilité de changer d'avis : Faible, Moyenne, Forte.
     - Réactivité aux campagnes : Faible, Moyenne, Forte.
     - Interactions interquartiers : Rare, Moyenne, Fréquente.
     - Nombre d'enfants : 0, 1, 2, 3, 4.
 
-    Fournissez une réponse au format XML compact avec les variables ci-dessus.
+    Complétez le fichier ci-dessous :
+    {data}
+    Fournissez un fichier CSV complété comme réponse.
     """
-    for attempt in range(retries):
-        try:
-            response = client.chat.complete(
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            print(f"Erreur pour {prenom} ({age} ans) : {e}")
-            if "429" in str(e):  # Gestion de la limite d'appels
-                print(f"Limite atteinte, attente de {cooldown} secondes...")
-                time.sleep(cooldown)
-            else:
-                break
-    return "<error></error>"  # Retourne un XML vide en cas d'erreur
 
-# Utiliser DataFrame.itertuples pour accélérer les boucles
-profiles = []
-brutes = []  # Collecter les réponses brutes non XML
-
-total_individuals = len(df)
-
-for index, row in enumerate(df.itertuples(index=False), start=1):
-    print(f"Traitement de {row.Prenom} ({getattr(row, 'Âge')} ans), {index}/{total_individuals}...")
-    profile_xml = get_logical_profile(row.Prenom, getattr(row, 'Âge'))  # Correction de l'accès à la colonne Âge
     try:
-        # Tenter de parser le XML pour vérifier la validité
-        root = ET.fromstring(profile_xml)
-        profile_dict = {child.tag: child.text for child in root}
-        profiles.append(profile_dict)
-    except ET.ParseError:
-        print(f"Erreur de décodage XML pour {row.Prenom} ({getattr(row, 'Âge')} ans). Réponse brute : {profile_xml}")
-        # Compactage de la réponse brute
-        compact_xml = profile_xml.replace("\n", " ").replace("  ", " ").strip()
-        profiles.append({})  # Ajouter un profil vide en cas d'erreur
-        brutes.append({"Prenom": row.Prenom, "Âge": getattr(row, 'Âge'), "Réponse brute": compact_xml})
+        response = client.chat.complete(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"Erreur lors de l'appel à Mistral : {e}")
+        return None
 
-# Ajouter les variables au DataFrame
-profiles_df = pd.DataFrame(profiles)  # Convertir la liste de profils en DataFrame
-df = pd.concat([df, profiles_df], axis=1)  # Fusionner les données originales avec les profils
+    # Fonction pour diviser le DataFrame en lots
+    def split_dataframe(df, batch_size):
+        for i in range(0, len(df), batch_size):
+            yield df.iloc[i:i + batch_size]
 
-# Créer un DataFrame pour les réponses brutes
-brutes_df = pd.DataFrame(brutes)
+    # Taille des lots 25
+    batch_size = 25
 
-# Sauvegarder les fichiers complétés
-output_file_path = "Individus_EXP_complet_colonnes.csv"
-df.to_csv(output_file_path, index=False)
-print(f"Fichier complété généré : {output_file_path}")
+    # Initialiser un DataFrame pour les résultats
+    results = []
 
-if not brutes_df.empty:
-    brutes_output_file_path = "Individus_EXP_reponses_brutes.csv"
-    brutes_df.to_csv(brutes_output_file_path, index=False)
-    print(f"Fichier des réponses brutes généré : {brutes_output_file_path}")
+# Traiter chaque lot
+    for batch in split_dataframe(df, batch_size):
+        csv_data = batch.to_csv(index=False)
+        completed_csv = complete_missing_data_with_mistral(csv_data)
 
+        if completed_csv:
+            # Nettoyer et charger les données du lot
+            raw_content = completed_csv.splitlines()
+            csv_lines = []
+            inside_csv = False
 
+            for line in raw_content:
+                if "```csv" in line:  # Début du CSV
+                    inside_csv = True
+                    continue
+                if "```" in line and inside_csv:  # Fin du CSV
+                    inside_csv = False
+                    continue
+                if inside_csv:
+                    csv_lines.append(line.strip())
 
+            cleaned_csv = "\n".join(csv_lines)
 
+# Charger les données nettoyées
+            from io import StringIO
+            try:
+                batch_df = pd.read_csv(StringIO(cleaned_csv))
+                results.append(batch_df)
+            except pd.errors.ParserError as e:
+                print(f"Erreur de parsing CSV pour un lot : {e}")
+                continue
 
+# Combiner tous les lots en un seul DataFrame
+    if results:
+        final_df = pd.concat(results, ignore_index=True)
+        output_file_path = "Individus_EXP_complet.csv"
+        final_df.to_csv(output_file_path, index=False)
+        print(f"Fichier complet généré avec succès : {output_file_path}")
+    else:
+        print("Aucun résultat final disponible.")
 
+# tests des scénarios politiques 
+    import os
+    import pandas as pd
+    import numpy as np
+    from mistralai import Mistral
+    from io import StringIO
+    import json
 
-import pandas as pd
-import numpy as np
+    # Initialisation avec votre clé API
+    api_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    model = "mistral-large-latest"
+    client = Mistral(api_key=api_key)
 
-# Génération des données pour les individus
-n_individus = 150
+    # Charger la base de données des individus
+    df = pd.read_csv("Individus_EXP_complet.csv")
+    batch_size = 10  # Nombre d'individus par lot
+    num_batches = int(np.ceil(len(df) / batch_size))
 
-df = pd.DataFrame({
-    'Âge': np.random.randint(18, 101, n_individus),
-    'Sexe': np.random.choice(['Homme', 'Femme'], n_individus),
-    'Statut matrimonial': np.random.choice(['Divorcé', 'Veuf', 'Marié', 'Célibataire'], n_individus),
-    'Niveau éducation': np.random.choice(['Pas de diplôme', 'Doctorat', 'Licence', 'Bac', 'Master'], n_individus),
-    'Statut professionnel': np.random.choice(['Indépendant', 'Retraité', 'Étudiant', 'Salarié', 'Chômeur'], n_individus),
-    'Quartier': np.random.choice(['Banlieue', 'Zone industrielle', 'Centre-ville'], n_individus),
-    'Revenu': np.random.choice(['<20k€', '20-40k€', '40-60k€', '>60k€'], n_individus),
-    'Statut logement': np.random.choice(['Locataire', 'Propriétaire'], n_individus),
-    'Type de logement': np.random.choice(['Maison', 'Appartement'], n_individus),
-    'Mode de transport': np.random.choice(['Vélo', 'Transport en commun', 'Voiture personnelle', 'Covoiturage', 'Télétravail', 'À pied'], n_individus),
-    'Distance domicile-travail': np.random.choice(['Moins de 1 km', '1-5 km', '5-10 km', 'Plus de 10 km'], n_individus),
-    'Affiliation politique': np.random.choice(['Indépendant', 'Parti X', 'Non affilié', 'Parti Y'], n_individus),
-    'Priorités politiques': np.random.choice(['Éducation', 'Environnement', 'Économie', 'Sécurité', 'Santé'], n_individus),
-    'Participation électorale': np.random.choice(['Régulière', 'Occasionnelle', 'Jamais'], n_individus),
-    'Fréquence de discussions politiques': np.random.choice(['Faible', 'Moyenne', 'Élevée'], n_individus),
-    'Confiance dans les institutions': np.random.randint(1, 6, n_individus),
-    'Engagement politique': np.random.choice(['Oui', 'Non'], n_individus),
-    'Influence sociale': np.random.choice(['Isolé', 'Leader', 'Suiveur'], n_individus),
-    'Taille du réseau social': np.random.choice(['Petit', 'Moyen', 'Grand'], n_individus),
-    'Activité en ligne': np.random.choice(['Actif', 'Passif', 'Inactif'], n_individus),
-    'Opinion sur l\'immigration': np.random.choice(['Négative', 'Positive', 'Neutre'], n_individus),
-    'Opinion sur la fiscalité': np.random.choice(['Pour une baisse', 'Pour une hausse', 'Neutre'], n_individus),
-    'Opinion sur les énergies': np.random.choice(['Fossiles', 'Renouvelables', 'Mixte'], n_individus),
-    'Probabilité de changer d\'avis': np.random.choice(['Faible', 'Moyenne', 'Élevée'], n_individus),
-    'Réactivité aux campagnes': np.random.choice(['Faible', 'Moyenne', 'Forte'], n_individus),
-    'Interactions interquartiers': np.random.choice(['Rare', 'Moyenne', 'Fréquente'], n_individus),
-    'Nombre d\'enfants': np.random.choice([0, 1, 2, 3, 4, 5], n_individus)
-})
+    # Définir les propositions initiales et revisitées
+    propositions_data = {
+        "Courants politiques": ["Gauche", "Gauche", "Gauche", "Centre", "Centre", "Centre", "Droite", "Droite", "Droite"],
+        "Valeurs principales": [
+            "Égalité sociale", "Solidarité", "Progressisme", 
+            "Pragmatisme", "Compromis", "Modération",
+            "Autorité", "Tradition", "Liberté individuelle"
+        ],
+        "Propositions Initiales": [
+            "Augmentation du SMIC à 1 500 € net",
+            "Création d'un revenu universel d'existence",
+            "Légalisation du cannabis",
+            "Réduction du nombre de fonctionnaires",
+            "Introduction de la proportionnelle",
+            "Suppression de la taxe d’habitation",
+            "Réduction de l’immigration légale",
+            "Défense des valeurs familiales traditionnelles",
+            "Allégement de la fiscalité sur les successions"
+        ],
+        "Propositions Revisitées": [
+            "Revaloriser immédiatement le SMIC à 1 500 € net pour répondre à l’inflation. Inclut des soutiens aux entreprises.",
+            "Mise en place d’un revenu progressif ciblant les jeunes et retraités précaires.",
+            "Encadrer et légaliser le cannabis pour investir dans la prévention et l’éducation.",
+            "Réduction progressive des effectifs non essentiels avec numérisation des services.",
+            "Introduction de la proportionnelle pour une meilleure représentation citoyenne.",
+            "Suppression totale avec une réforme fiscale équitable.",
+            "Mise en œuvre d’une politique d’intégration pour garantir cohésion et sécurité.",
+            "Augmentation des allocations pour familles nombreuses.",
+            "Réduction drastique des droits de succession"
+        ]
+    }
+    propositions_df = pd.DataFrame(propositions_data)
 
-# Ajout des scénarios politiques
-propositions_data = {
-    "Courant politique": ["Gauche", "Gauche", "Gauche", "Centre", "Centre", "Centre", "Droite", "Droite", "Droite"],
-    "Valeur principale": ["Égalité sociale", "Solidarité", "Progressisme", "Pragmatisme", "Compromis", "Modération", "Autorité", "Tradition", "Liberté individuelle"],
-    "Propositions Initiales": [
-        "Augmentation du SMIC à 1500 € net",
-        "Création d’un revenu universel d’existence",
-        "Légalisation du cannabis",
-        "Réduction du nombre de fonctionnaires",
-        "Introduction de la proportionnelle",
-        "Suppression de la taxe d’habitation",
-        "Réduction de l’immigration légale",
-        "Défense des valeurs familiales traditionnelles",
-        "Allégement de la fiscalité sur les successions"
-    ],
-    "Propositions Revisitées": [
-        "Revaloriser immédiatement le SMIC à 1500 € net pour répondre à l’inflation. Inclut des soutiens aux entreprises.",
-        "Mise en place d’un revenu progressif ciblant les jeunes et retraités précaires.",
-        "Encadrer et légaliser le cannabis pour investir dans la prévention et l’éducation.",
-        "Réduction progressive des effectifs non essentiels avec numérisation des services.",
-        "Introduction de la proportionnelle pour une meilleure représentation citoyenne.",
-        "Suppression totale avec une réforme fiscale équitable.",
-        "Mise en œuvre d’une politique d’intégration pour garantir cohésion et sécurité.",
-        "Augmentation des allocations pour familles nombreuses.",
-        "Réduction drastique des droits de succession"
-    ],
-    "Résultats Initiaux": [
-        "Mobilisé l’électorat de gauche, contribuant à une dynamique positive pour le candidat.",
-        "Novatrice, mais n'a pas suffi à éviter l’élimination du candidat dès le premier tour.",
-        "Suscité des débats, mais n'a pas été un facteur déterminant dans les résultats électoraux.",
-        "Contribué à l’image réformatrice du candidat, élu président avec 66,1 % des voix au second tour.",
-        "Bien accueillie par une partie de l’électorat centriste, cette réforme n'a pas encore été pleinement mise en œuvre.",
-        "Populaire et mise en œuvre progressivement durant le quinquennat.",
-        "Mobilisé l’électorat de droite, mais le candidat a été battu au second tour.",
-        "Consolidé la base électorale traditionnelle, sans toutefois élargir significativement l’électorat.",
-        "Malgré cette proposition, le candidat a été éliminé dès le premier tour en raison de scandales judiciaires."
-    ]
-}
+    # Définir les scénarios
+    scenarios = {
+        "Scénario 1": "Propositions initiales réelles pour tous les partis.",
+        "Scénario 2 - Gauche": "Optimisation par parti : Gauche applique ses propositions revisitées contre les initiales des autres.",
+        "Scénario 2 - Centre": "Optimisation par parti : Centre applique ses propositions revisitées contre les initiales des autres.",
+        "Scénario 2 - Droite": "Optimisation par parti : Droite applique ses propositions revisitées contre les initiales des autres.",
+        "Scénario 3": "Proposition utopique pour la Gauche (SMIC à 6000 €)."
+    }
 
-propositions_df = pd.DataFrame(propositions_data)
-
-# Scénarios
-scenarios = {
-    "Scénario 1": "Propositions initiales réelles pour tous les partis.",
-    "Scénario 2 - Gauche": "Optimisation par parti : Gauche applique ses propositions revisitées contre les initiales des autres.",
-    "Scénario 2 - Centre": "Optimisation par parti : Centre applique ses propositions revisitées contre les initiales des autres.",
-    "Scénario 2 - Droite": "Optimisation par parti : Droite applique ses propositions revisitées contre les initiales des autres.",
-    "Scénario 3": "Proposition utopique pour la Gauche (SMIC à 6000 €)."
-}
-
-# Fonction d'ajustement des intentions de vote prenant en compte toutes les variables
-def adjust_vote_intentions(individual, proposition, is_optimized=False, utopian=False):
-    score = 0
-
-    # Influence par le revenu
-    if proposition["Courant politique"] == "Gauche" and individual["Revenu"] in ["<20k€", "20-40k€"]:
-        score += 3
-    elif proposition["Courant politique"] == "Centre" and individual["Revenu"] in ["40-60k€"]:
-        score += 3
-    elif proposition["Courant politique"] == "Droite" and individual["Revenu"] in [">60k€"]:
-        score += 3
-
-    # Influence par l'âge
-    if proposition["Courant politique"] == "Gauche" and individual["Âge"] < 30:
-        score += 3
-    elif proposition["Courant politique"] == "Centre" and 30 <= individual["Âge"] < 50:
-        score += 3
-    elif proposition["Courant politique"] == "Droite" and individual["Âge"] >= 50:
-        score += 3
-
-    # Influence par le niveau d'éducation
-    if individual["Niveau éducation"] in ["Pas de diplôme", "Bac"] and proposition["Courant politique"] == "Gauche":
-        score += 2
-    elif individual["Niveau éducation"] in ["Master", "Doctorat"] and proposition["Courant politique"] == "Droite":
-        score += 2
-
-    # Influence par le statut professionnel
-    if individual["Statut professionnel"] == "Étudiant" and proposition["Courant politique"] == "Gauche":
-        score += 2
-    elif individual["Statut professionnel"] == "Retraité" and proposition["Courant politique"] == "Droite":
-        score += 2
-
-    # Influence par les opinions
-    if individual["Opinion sur l'immigration"] == "Positive" and proposition["Courant politique"] == "Gauche":
-        score += 3
-    elif individual["Opinion sur l'immigration"] == "Négative" and proposition["Courant politique"] == "Droite":
-        score += 3
-
-    # Influence par les priorités politiques
-    if individual["Priorités politiques"] == "Santé" and proposition["Courant politique"] == "Gauche":
-        score += 3
-    elif individual["Priorités politiques"] == "Économie" and proposition["Courant politique"] == "Centre":
-        score += 3
-    elif individual["Priorités politiques"] == "Sécurité" and proposition["Courant politique"] == "Droite":
-        score += 3
-
-    # Influence par la réactivité aux campagnes
-    if individual["Réactivité aux campagnes"] == "Forte":
-        score += 2
-
-    # Influence par la confiance dans les institutions
-    if individual["Confiance dans les institutions"] >= 4 and proposition["Courant politique"] == "Centre":
-        score += 3
-
-    # Bonus pour propositions revisitées
-    if is_optimized:
-        score += 5
-
-    # Bonus pour une proposition utopique
-    if utopian:
-        score += 8
-
-    return score
-
-# Simulations Monte Carlo avec votes Blanc/Nul dynamiques
-def monte_carlo_simulation(iterations, df, propositions_df, scenarios):
-    monte_carlo_results = {scenario: [] for scenario in scenarios}
-
-    for _ in range(iterations):
-        for scenario, description in scenarios.items():
-            vote_intentions = {"Gauche": np.zeros(len(df)), "Centre": np.zeros(len(df)), "Droite": np.zeros(len(df)), "Blanc/Nul": np.zeros(len(df))}
-
-            for index, row in propositions_df.iterrows():
-                if scenario == f"Scénario 2 - {row['Courant politique']}":
-                    proposition = {"Courant politique": row["Courant politique"], "Propositions Initiales": row["Propositions Revisitées"]}
-                    is_optimized = True
-                    utopian = False
-                elif scenario == "Scénario 3" and row["Courant politique"] == "Gauche":
-                    proposition = {"Courant politique": "Gauche", "Propositions Initiales": "SMIC à 6000 €"}
-                    is_optimized = False
-                    utopian = True
+    # Fonction pour préparer le prompt et exécuter la simulation avec Mistral
+    def mistral_simulation(individuals, propositions, scenarios, retries=3, cooldown=30):
+        prompt = f"""
+        Vous devez simuler les intentions de vote pour les individus de la base de données fournies en fonction des scénarios politiques.
+        Voici les données :
+    
+        ### INDIVIDUS ###
+        Les individus sont décrits avec les caractéristiques suivantes :
+        {individuals.to_dict(orient='records')}
+    
+        ### PROPOSITIONS ###
+        Voici les propositions initiales et revisitées pour chaque parti :
+        {propositions.to_dict(orient='records')}
+    
+        ### SCÉNARIOS ###
+        Les scénarios à simuler sont :
+        {scenarios}
+    
+        ### INSTRUCTIONS ###
+        Pour chaque individu, simulez une interaction avec chaque proposition dans chaque scénario. 
+        - Les intentions de vote doivent être ajustées en fonction de toutes les caractéristiques des individus :âge, niveau_education, revenu, statut_professionnel, quartier, affiliation_politique, priorités_politiques, participation_électorale, confiance_institutions, opinion_immigration, opinion_fiscalité, opinion_énergies.Simulez les interactions (tracts, débats, réseaux sociaux) pour influencer les intentions de vote.
+        - Dans le Scénario 1, à chaque individus tu dois presenter les propositons initiales contres les propositions initiales des autres.
+        - Dans le Scénario 2, présente les propositions revisitées pour chaque parti contre les propositions initiales des autres. 
+        - Dans le Scénario 3, présente une proposition utopique pour la Gauche (SMIC à 6000 €), contre les propositions initiales des autres.
+        Retournez les résultats sous la forme d'une agrégation des intentions de vote pour chaque parti à chaque scénario (Gauche, Centre, Droite, Blanc/Nul), conserve le meme format de sorties a chaque batsh, ### FORMAT DE RÉPONSE ATTENDU ###
+    Retournez les résultats des intentions de vote sous ce format exact. Respectez strictement la structure, les titres, et l'alignement des colonnes pour chaque scénario.
+    
+    Format imperatif attendu :
+    
+    ### RÉSULTATS DES SIMULATIONS INTENTIONS DE VOTES  ###
+    avec Calculer la moyenne pondérée = strictement nombre de votants partis/ 10 par scenario par batsh pour les pourcentages dans les tableaux,
+              
+    #### Scénario 1 Propositions initiales
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 2 - Gauche applique ses propositions revisitées
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 2 - Centre applique ses propositions revisitées
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 2 - Droite applique ses propositions revisitées
+    || Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    #### Scénario 3
+    | Parti      | Nombre de votants | Pourcentage |
+    |------------|-------------------|-------------|
+    | Gauche     | XX                | XX%         |
+    | Centre     | XX                | XX%         |
+    | Droite     | XX                | XX%         |
+    | Blanc/Nul  | XX                | XX%         |
+    
+    ne pas integrer de ### Détails des simulations.
+    
+    puis print le resultat du batsh suivant.
+    
+        """
+        
+        for attempt in range(retries):
+            try:
+                response = client.chat.complete(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                return response.choices[0].message.content
+            except Exception as e:
+                print(f"Erreur d'appel à Mistral : {e}")
+                if "429" in str(e):  # Gestion de la limite d'appels
+                    print(f"Limite atteinte, attente de {cooldown} secondes...")
+                    time.sleep(cooldown)
                 else:
-                    proposition = row
-                    is_optimized = False
-                    utopian = False
+                    break
+        return None  # En cas d'échec
 
-                for i, individual in df.iterrows():
-                    score = adjust_vote_intentions(individual, proposition, is_optimized, utopian)
-                    if individual["Confiance dans les institutions"] < 3 and np.random.rand() < 0.5:
-                        vote_intentions["Blanc/Nul"][i] += 1
-                    else:
-                        vote_intentions[proposition["Courant politique"]][i] += score
+    # Lancer les simulations par lots
+    all_results = []
+    for i in range(num_batches):
+        print(f"Traitement du lot {i+1}/{num_batches}...")
+        batch = df.iloc[i * batch_size:(i + 1) * batch_size]
+        response = mistral_simulation(batch, propositions_df, scenarios)
+        
+        if response:
+            try:
+                # Convertir la réponse JSON en DataFrame
+                results = pd.read_json(StringIO(response))
+                all_results.append(results)
+            except ValueError as e:
+                print(f"Erreur dans le traitement de la réponse de Mistral pour le lot {i+1} : {e}")
+                print("Résultats :", response)
+        else:
+            print(f"Aucune réponse valide obtenue pour le lot {i+1}.")
 
-            votes = []
-            for i in range(len(df)):
-                scores = {party: vote_intentions[party][i] for party in vote_intentions}
-                votes.append(max(scores, key=scores.get))
+--------------------------
+#Copiez l'output de ce dernier scipt dans le press papier
+--------------------------
+## Agréger tous les résultats en collant l'output à l'emplacement indiqué
+    import pandas as pd
+    import re
+    from collections import defaultdict
+    
+    # Fonction pour extraire les données des 15 lots à partir d'un texte donné
+    def parse_simulation_output(simulation_output):
+        """
+        Analyse les résultats des simulations intention de votes à partir d'une chaîne de caractères.
+        :param simulation_output: Texte contenant les résultats des simulations.
+        :return: Dictionnaire structuré des résultats pour chaque scénario.
+        """
+        scenarios = {
+            "Scénario 1": "Propositions initiales",
+            "Scénario 2 - Gauche": "Gauche applique ses propositions revisitées",
+            "Scénario 2 - Centre": "Centre applique ses propositions revisitées",
+            "Scénario 2 - Droite": "Droite applique ses propositions revisitées",
+            "Scénario 3": "Proposition utopique pour la Gauche"
+        }
+    
+        # Stockage des résultats agrégés
+        results = defaultdict(lambda: defaultdict(int))
+    
+        # Extraction des blocs par scénario
+        for scenario, description in scenarios.items():
+            # Recherche du bloc correspondant au scénario
+            pattern = rf"#### {scenario}.*?\| Gauche\s+\|\s+(\d+).*?\| Centre\s+\|\s+(\d+).*?\| Droite\s+\|\s+(\d+).*?\| Blanc/Nul\s+\|\s+(\d+)"
+            matches = re.findall(pattern, simulation_output, re.DOTALL)
+    
+            for match in matches:
+                results[scenario]["Gauche"] += int(match[0])
+                results[scenario]["Centre"] += int(match[1])
+                results[scenario]["Droite"] += int(match[2])
+                results[scenario]["Blanc/Nul"] += int(match[3])
+    
+        return results
+    
+    # Exemple de simulation_output à remplacer par le texte réel
+    def calculate_totals_from_text(simulation_output):
+        """
+        Calcule les totaux pour chaque scénario à partir du texte donné.
+        :param simulation_output: Texte contenant les résultats des simulations.
+        """
+        data = parse_simulation_output(simulation_output)
+    
+        # Affichage des résultats avec validation
+        for scenario, result in data.items():
+            total_votes = sum(result.values())
+            print(f"### {scenario} ###")
+            print("| Parti      | Nombre de votants |")
+            print("|------------|-------------------|")
+            for party, votes in result.items():
+                print(f"| {party:<10} | {votes:<17} |")
+            print(f"\nTotal des votants : {total_votes}\n")
+    
+            # Vérification si le total dépasse 150
+            if total_votes > 150:
+                print(f"⚠️  Anomalie détectée : Le total des votes ({total_votes}) dépasse 150 pour {scenario}.")
+    
+    # Placez ici le texte/output des simulations entre """ """
+    simulation_output = """ """
+    
+    # Exécution de l'analyse et calcul des totaux
+    calculate_totals_from_text(simulation_output)
+    
 
-            vote_counts = pd.Series(votes).value_counts().reindex(["Gauche", "Centre", "Droite", "Blanc/Nul"], fill_value=0)
-            monte_carlo_results[scenario].append(vote_counts)
 
-    return monte_carlo_results
-
-# Exécution de la simulation Monte Carlo
-iterations = 120
-monte_carlo_results = monte_carlo_simulation(iterations, df, propositions_df, scenarios)
-
-# Agrégation des résultats
-final_results = {}
-for scenario, results in monte_carlo_results.items():
-    aggregated = pd.DataFrame(results).mean().round(0).astype(int)
-    aggregated["Objectif"] = scenarios[scenario]
-    final_results[scenario] = aggregated
-
-# Affichage des résultats
-for scenario, result in final_results.items():
-    print(f"Résultats pour le {scenario} :")
-    print(result.to_string())
-    print("\n")
