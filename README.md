@@ -28,35 +28,49 @@ Individus_EXP = select_random_individuals(df)
 
 Individus_EXP.to_csv("sample_individus.csv", index=False)  # Fichier avec les 150 individus sélectionnés
 print("sample_individus.csv généré.")
-df = pd.DataFrame({
-    'Âge': np.random.randint(18, 101, n_individus),
-    'Sexe': np.random.choice(['Homme', 'Femme'], n_individus),
-    'Statut matrimonial': np.random.choice(['Divorcé', 'Veuf', 'Marié', 'Célibataire'], n_individus),
-    'Niveau éducation': np.random.choice(['Pas de diplôme', 'Doctorat', 'Licence', 'Bac', 'Master'], n_individus),
-    'Statut professionnel': np.random.choice(['Indépendant', 'Retraité', 'Étudiant', 'Salarié', 'Chômeur'], n_individus),
-    'Quartier': np.random.choice(['Banlieue', 'Zone industrielle', 'Centre-ville'], n_individus),
-    'Revenu': np.random.choice(['<20k€', '20-40k€', '40-60k€', '>60k€'], n_individus),
-    'Statut logement': np.random.choice(['Locataire', 'Propriétaire'], n_individus),
-    'Type de logement': np.random.choice(['Maison', 'Appartement'], n_individus),
-    'Mode de transport': np.random.choice(['Vélo', 'Transport en commun', 'Voiture personnelle', 'Covoiturage', 'Télétravail', 'À pied'], n_individus),
-    'Distance domicile-travail': np.random.choice(['Moins de 1 km', '1-5 km', '5-10 km', 'Plus de 10 km'], n_individus),
-    'Affiliation politique': np.random.choice(['Indépendant', 'Parti X', 'Non affilié', 'Parti Y'], n_individus),
-    'Priorités politiques': np.random.choice(['Éducation', 'Environnement', 'Économie', 'Sécurité', 'Santé'], n_individus),
-    'Participation électorale': np.random.choice(['Régulière', 'Occasionnelle', 'Jamais'], n_individus),
-    'Fréquence de discussions politiques': np.random.choice(['Faible', 'Moyenne', 'Élevée'], n_individus),
-    'Confiance dans les institutions': np.random.randint(1, 6, n_individus),
-    'Engagement politique': np.random.choice(['Oui', 'Non'], n_individus),
-    'Influence sociale': np.random.choice(['Isolé', 'Leader', 'Suiveur'], n_individus),
-    'Taille du réseau social': np.random.choice(['Petit', 'Moyen', 'Grand'], n_individus),
-    'Activité en ligne': np.random.choice(['Actif', 'Passif', 'Inactif'], n_individus),
-    'Opinion sur l\'immigration': np.random.choice(['Négative', 'Positive', 'Neutre'], n_individus),
-    'Opinion sur la fiscalité': np.random.choice(['Pour une baisse', 'Pour une hausse', 'Neutre'], n_individus),
-    'Opinion sur les énergies': np.random.choice(['Fossiles', 'Renouvelables', 'Mixte'], n_individus),
-    'Probabilité de changer d\'avis': np.random.choice(['Faible', 'Moyenne', 'Élevée'], n_individus),
-    'Réactivité aux campagnes': np.random.choice(['Faible', 'Moyenne', 'Forte'], n_individus),
-    'Interactions interquartiers': np.random.choice(['Rare', 'Moyenne', 'Fréquente'], n_individus),
-    'Nombre d\'enfants': np.random.choice([0, 1, 2, 3, 4, 5], n_individus)
-})
+
+#Ce code génère un profil pour les 150 individus choisis au hasard
+        # Charger la base de données "sample_individus.csv"
+df = pd.read_csv("sample_individus.csv")
+
+# Liste des colonnes à ajouter
+colonnes_a_ajouter = [
+    "statut_matrimonial",
+    "niveau_education",
+    "statut_professionnel",
+    "quartier",
+    "revenu",
+    "statut_logement",
+    "type_logement",
+    "mode_transport",
+    "distance_domicile_travail",
+    "affiliation_politique",
+    "priorités_politiques",
+    "participation_électorale",
+    "fréquence_discussions_politiques",
+    "confiance_institutions",
+    "engagement_politique",
+    "influence_sociale",
+    "taille_réseau_social",
+    "activité_en_ligne",
+    "opinion_immigration",
+    "opinion_fiscalité",
+    "opinion_énergies",
+    "probabilité_changement_avis",
+    "réactivité_campagnes",
+    "interactions_interquartiers",
+    "nombre_enfants",
+]
+
+# Ajouter les colonnes non remplies avec des valeurs NaN
+for colonne in colonnes_a_ajouter:
+    if colonne not in df.columns:
+        df[colonne] = pd.NA
+
+# Sauvegarder le fichier avec les colonnes ajoutées
+output_file_path = "sample_individus_avec_colonnes.csv"
+df.to_csv(output_file_path, index=False)
+print(f"Fichier avec colonnes ajoutées généré : {output_file_path}")
 
 # Ajout des scénarios politiques
 propositions_data = {
