@@ -1,25 +1,26 @@
 # Projet-économie-du-numérique
+
 Mon projet permet d'experimenter et de tester la capacité des LLM à modéliser l'effet des propositions politiques optimisées par GPT4o, sur les intentions de vote des individus en fonction de leur profil sociodémographique et de leurs préférences.
 
 
 # Génération d'une base de données de 150 individus
 
-import numpy as np
-import pandas as pd
-import random
+    import numpy as np
+    import pandas as pd
+    import random
 
 # Charger la base de données "individus_bdd"
-df = pd.read_csv("individus_bdd.csv")
+    df = pd.read_csv("individus_bdd.csv")
 
 # Ajouter une colonne "Age" avec des valeurs aléatoires entre 18 et 99
-df['Age'] = [random.randint(18, 99) for _ in range(len(df))]
+    df['Age'] = [random.randint(18, 99) for _ in range(len(df))]
 
 # Sélectionner 150 individus aléatoires
-def select_random_individuals(df, count=150):
-    if len(df) < count:
-        print("Le DataFrame contient moins de 150 individus, tous seront inclus.")
-        return df
-    return df.sample(n=count, random_state=42)
+    def select_random_individuals(df, count=150):
+        if len(df) < count:
+            print("Le DataFrame contient moins de 150 individus, tous seront inclus.")
+            return df
+        return df.sample(n=count, random_state=42)
 
 # Sélectionner les individus finaux
 Individus_EXP = select_random_individuals(df)
