@@ -30,7 +30,7 @@ Individus_EXP.to_csv("sample_individus.csv", index=False)  # Fichier avec les 15
 print("sample_individus.csv généré.")
 
 #Ce code génère un profil pour les 150 individus choisis au hasard
-        # Charger la base de données "sample_individus.csv"
+# Charger la base de données "sample_individus.csv"
 df = pd.read_csv("sample_individus.csv")
 
 # Liste des colonnes à ajouter
