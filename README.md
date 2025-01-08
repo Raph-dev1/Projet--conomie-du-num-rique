@@ -244,7 +244,7 @@ Le code nécéssite la base de données : individus_bdd.csv
         "Scénario 2 - Droite": "Optimisation par parti : Droite applique ses propositions revisitées contre les initiales des autres.",
         "Scénario 3": "Proposition utopique pour la Gauche (SMIC à 6000 €)."
     }
-
+    #Il est possible de modifier les variables d'influence pour l'intention de vote à la ligne 268
     # Fonction pour préparer le prompt et exécuter la simulation avec Mistral
     def mistral_simulation(individuals, propositions, scenarios, retries=3, cooldown=30):
         prompt = f"""
