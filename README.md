@@ -90,7 +90,7 @@ Le code nécéssite la base de données : individus_bdd.csv
 # Fonction pour demander à Mistral de compléter les données manquantes
     def complete_missing_data_with_mistral(data):
         prompt = f"""
-        Voici un fichier CSV contenant des données d'individus avec des colonnes incomplètes. Complétez les données              manquantes de manière réaliste et cohérente en respectant les valeurs possibles suivantes :
+        Voici un fichier CSV contenant des données d'individus avec des colonnes incomplètes. Complétez les données manquantes de manière réaliste et cohérente en respectant les valeurs possibles suivantes :
 
     - Statut matrimonial : Divorce, Veuf, Marie, Celibataire.
     - Niveau education : Pas de diplome, Doctorat, Licence, Bac, Master.
