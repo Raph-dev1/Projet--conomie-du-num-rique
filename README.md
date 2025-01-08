@@ -357,5 +357,72 @@ Le code nécéssite la base de données : individus_bdd.csv
         else:
             print(f"Aucune réponse valide obtenue pour le lot {i+1}.")
 
+#Copiez l'output de ce dernier scipt dans le press papier
 
+------------------
+## Agréger tous les résultats en collant l'output à l'emplacement indiqué
+    import pandas as pd
+    import re
+    from collections import defaultdict
+    
+    # Fonction pour extraire les données des 15 lots à partir d'un texte donné
+    def parse_simulation_output(simulation_output):
+        """
+        Analyse les résultats des simulations intention de votes à partir d'une chaîne de caractères.
+        :param simulation_output: Texte contenant les résultats des simulations.
+        :return: Dictionnaire structuré des résultats pour chaque scénario.
+        """
+        scenarios = {
+            "Scénario 1": "Propositions initiales",
+            "Scénario 2 - Gauche": "Gauche applique ses propositions revisitées",
+            "Scénario 2 - Centre": "Centre applique ses propositions revisitées",
+            "Scénario 2 - Droite": "Droite applique ses propositions revisitées",
+            "Scénario 3": "Proposition utopique pour la Gauche"
+        }
+    
+        # Stockage des résultats agrégés
+        results = defaultdict(lambda: defaultdict(int))
+    
+        # Extraction des blocs par scénario
+        for scenario, description in scenarios.items():
+            # Recherche du bloc correspondant au scénario
+            pattern = rf"#### {scenario}.*?\| Gauche\s+\|\s+(\d+).*?\| Centre\s+\|\s+(\d+).*?\| Droite\s+\|\s+(\d+).*?\| Blanc/Nul\s+\|\s+(\d+)"
+            matches = re.findall(pattern, simulation_output, re.DOTALL)
+    
+            for match in matches:
+                results[scenario]["Gauche"] += int(match[0])
+                results[scenario]["Centre"] += int(match[1])
+                results[scenario]["Droite"] += int(match[2])
+                results[scenario]["Blanc/Nul"] += int(match[3])
+    
+        return results
+    
+    # Exemple de simulation_output à remplacer par le texte réel
+    def calculate_totals_from_text(simulation_output):
+        """
+        Calcule les totaux pour chaque scénario à partir du texte donné.
+        :param simulation_output: Texte contenant les résultats des simulations.
+        """
+        data = parse_simulation_output(simulation_output)
+    
+        # Affichage des résultats avec validation
+        for scenario, result in data.items():
+            total_votes = sum(result.values())
+            print(f"### {scenario} ###")
+            print("| Parti      | Nombre de votants |")
+            print("|------------|-------------------|")
+            for party, votes in result.items():
+                print(f"| {party:<10} | {votes:<17} |")
+            print(f"\nTotal des votants : {total_votes}\n")
+    
+            # Vérification si le total dépasse 150
+            if total_votes > 150:
+                print(f"⚠️  Anomalie détectée : Le total des votes ({total_votes}) dépasse 150 pour {scenario}.")
+    
+    # Placez ici le texte/output des simulations entre """ """
+    simulation_output = """ """
+    
+    # Exécution de l'analyse et calcul des totaux
+    calculate_totals_from_text(simulation_output)
+    
 
