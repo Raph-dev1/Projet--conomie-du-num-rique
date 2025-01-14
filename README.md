@@ -1,11 +1,11 @@
-# Projet-économie-du-numérique
+# Projet économie du numérique 2025
 Base de données nécessaire : individus_bdd.csv
 
 Ce projet vous permet d'explorer et tester la capacité des modèles de langage (LLM) à modéliser l’effet de propositions politiques optimisées sur les intentions de vote des individus, en fonction de leur profil sociodémographique et de leurs préférences.
 
 Le projet s’appuie sur GPT-4o pour optimiser des propositions politiques, puis utilise l’API du LLM Mistral pour simuler et analyser les intentions de vote de 150 individus. Ces simulations mettent en interaction des profils détaillés (ajustables facilement) avec des propositions issues de programmes politiques français réels, ainsi que des versions optimisées pour maximiser leur attractivité et les intentions de votes.
 
-# Méthodologie
+# Méthodologie :
     
 Le projet suit une approche en trois étapes principales :
 
