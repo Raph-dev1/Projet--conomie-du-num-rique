@@ -36,7 +36,7 @@ Le nombre et la part de votants pour chaque parti.
 L’impact différentiel des propositions initiales et optimisées.
 La performance de l’API Mistral dans la modélisation et l’influence des intentions de vote.
 Ce projet constitue une expérimentation unique sur l’interaction entre profils sociodémographiques, propositions politiques, et outils d’IA, tout en mettant en lumière les dynamiques entre optimisation algorithmique et comportement électoral.
-
+#Explications des parties du code
 # Génération d'une base de données de 150 individus
 
     import numpy as np
