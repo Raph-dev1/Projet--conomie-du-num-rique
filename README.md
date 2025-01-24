@@ -27,7 +27,7 @@ Propositions optimisées : Interaction avec des propositions revisitées et opti
 
 Propositions utopiques : Par exemple, une proposition très ambitieuse pour un parti spécifique.
 Les simulations évaluent comment ces propositions influencent les intentions de vote, en tenant compte des caractéristiques individuelles.
-Permet d'oberserver des variations en cas de proposititon utopique/irréaliste, ==> illustre la perception plus générale d'un partis en particullier,
+Permet d'observer des variations en cas de proposititon utopique/irréaliste, ==> illustre la perception plus générale d'un partis en particulier,
 
 Analyse des résultats
 Les résultats sont agrégés pour chaque scénario, en calculant :
